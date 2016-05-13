@@ -31,6 +31,19 @@ public class Response<T> {
     }
 }
 
+public protocol ExternalDateEncoderDecoder {
+    func date2JSON(date:NSDate)->String
+    func JSON2Date(string:String)->NSDate?
+}
+
+public class ExternalDateEncoderDecoders {
+    static var coder:ExternalDateEncoderDecoder? = nil
+
+    static public func add(ed:ExternalDateEncoderDecoder?){
+        coder = ed
+    }
+}
+
 private var once = dispatch_once_t()
 class Decoders {
     static private var decoders = Dictionary<String, ((AnyObject) -> AnyObject)>()
@@ -120,6 +133,9 @@ class Decoders {
                         if let date = formatter.dateFromString(sourceString) {
                             return date
                         }
+                    }
+                    if let date = ExternalDateEncoderDecoders.coder?.JSON2Date(sourceString) {
+                        return date
                     }
                 
                 }

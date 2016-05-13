@@ -67,6 +67,18 @@ private let dateFormatter: NSDateFormatter = {
 }()
 
 extension NSDate: JSONEncodable {
+    func encodeToJSONStandard() -> AnyObject {
+        return dateFormatter.stringFromDate(self)
+    }
+    func encodeToJSON() -> AnyObject {
+        if ExternalDateEncoderDecoders.coder != nil {
+            return (ExternalDateEncoderDecoders.coder?.date2JSON(self))!
+        }
+        return encodeToJSONStandard()
+    }
+}
+
+extension NSDate: JSONEncodable {
     func encodeToJSON() -> AnyObject {
         return dateFormatter.stringFromDate(self)
     }
