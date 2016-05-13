@@ -9,19 +9,34 @@ import {{modelPackage}}.*;
 
 public class JsonUtil {
   public static GsonBuilder gsonBuilder;
+  private static CustomDateConverter customDateConverter;
 
   static {
     gsonBuilder = new GsonBuilder();
     gsonBuilder.serializeNulls();
-    gsonBuilder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    gsonBuilder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+    customDateConverter = new CustomDateConverter() {
+        public String convertDateSwaggerToDateAPI(Class objectClass, String jsonString) {
+            return jsonString;
+        }
+
+        public String convertDateAPItoDateSwagger(String jsonString) {
+            return jsonString;
+        }
+    };
   }
 
   public static Gson getGson() {
     return gsonBuilder.create();
   }
 
+  public static void setCustomDateConverter(CustomDateConverter customDateConverter) {
+    JsonUtil.customDateConverter = customDateConverter;
+  }
+
   public static String serialize(Object obj){
-    return getGson().toJson(obj);
+    return customDateConverter.convertDateSwaggerToDateAPI(obj.getClass(), getGson().toJson(obj));
   }
 
   public static <T> T deserializeToList(String jsonString, Class cls){
@@ -29,7 +44,7 @@ public class JsonUtil {
   }
 
   public static <T> T deserializeToObject(String jsonString, Class cls){
-    return getGson().fromJson(jsonString, getTypeForDeserialization(cls));
+    return getGson().fromJson(customDateConverter.convertDateAPItoDateSwagger(jsonString), getTypeForDeserialization(cls));
   }
 
   public static Type getListTypeForDeserialization(Class cls) {
@@ -52,4 +67,8 @@ public class JsonUtil {
     return new TypeToken<Object>(){}.getType();
   }
 
+  public interface CustomDateConverter {
+    public String convertDateSwaggerToDateAPI(Class objectClass, String jsonString);
+    public String convertDateAPItoDateSwagger(String jsonString);
+  }
 };
