@@ -78,11 +78,6 @@ extension NSDate: JSONEncodable {
     }
 }
 
-extension NSDate: JSONEncodable {
-    func encodeToJSON() -> AnyObject {
-        return dateFormatter.stringFromDate(self)
-    }
-}
 
 {{#usePromiseKit}}extension RequestBuilder {
     public func execute() -> Promise<Response<T>>  {
